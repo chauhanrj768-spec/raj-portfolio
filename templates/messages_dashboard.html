@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Messages Dashboard | Raj Kumar Chauhan</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI',sans-serif;background:#0a0e1a;color:#e2e8f0;min-height:100vh;}
+header{background:linear-gradient(135deg,#7c3aed,#06b6d4);padding:1.25rem 2rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;}
+header h1{font-size:1.3rem;font-weight:700;display:flex;align-items:center;gap:.6rem;}
+.header-links{display:flex;gap:.75rem;}
+.header-links a{color:#fff;text-decoration:none;font-size:0.82rem;border:1px solid rgba(255,255,255,0.35);padding:.35rem .9rem;border-radius:8px;transition:.2s;}
+.header-links a:hover{background:rgba(255,255,255,0.15);}
+.container{max-width:960px;margin:2rem auto;padding:0 1.5rem;}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1rem;margin-bottom:2rem;}
+.stat{background:#131929;border:1px solid rgba(124,58,237,0.2);border-radius:12px;padding:1.25rem;text-align:center;}
+.stat .n{font-size:2rem;font-weight:800;background:linear-gradient(135deg,#7c3aed,#06b6d4);background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.stat .l{font-size:0.78rem;color:#94a3b8;margin-top:.2rem;}
+.unread-badge{display:inline-block;padding:.15rem .55rem;background:#7c3aed;border-radius:999px;font-size:.7rem;font-weight:700;color:#fff;margin-left:.4rem;vertical-align:middle;}
+.empty{text-align:center;padding:4rem;color:#64748b;}
+.msg{background:#131929;border:1px solid rgba(124,58,237,0.18);border-radius:14px;padding:1.5rem;margin-bottom:1.25rem;transition:.2s;}
+.msg:hover{border-color:rgba(6,182,212,0.4);}
+.msg.unread{border-left:3px solid #7c3aed;}
+.msg-top{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;margin-bottom:.75rem;flex-wrap:wrap;}
+.msg-name{font-weight:700;font-size:1rem;}
+.msg-email{color:#06b6d4;font-size:.82rem;margin-top:.1rem;}
+.msg-date{color:#64748b;font-size:.75rem;white-space:nowrap;}
+.msg-subject{font-size:.85rem;color:#94a3b8;margin-bottom:.5rem;}
+.msg-subject span{color:#a78bfa;}
+.msg-body{color:#cbd5e1;font-size:.9rem;line-height:1.7;background:#0f1629;border-radius:8px;padding:.85rem 1rem;}
+.msg-actions{display:flex;gap:.6rem;margin-top:.9rem;}
+.btn-read{background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.25);color:#4ade80;font-size:.75rem;padding:.3rem .75rem;border-radius:8px;cursor:pointer;text-decoration:none;transition:.2s;}
+.btn-read:hover{background:rgba(34,197,94,0.25);}
+.btn-del{background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.25);color:#f87171;font-size:.75rem;padding:.3rem .75rem;border-radius:8px;cursor:pointer;transition:.2s;}
+.btn-del:hover{background:rgba(239,68,68,0.25);}
+</style>
+</head>
+<body>
+<header>
+  <h1><i class="fas fa-inbox"></i> Messages Dashboard
+    {% if unread > 0 %}<span class="unread-badge">{{ unread }} new</span>{% endif %}
+  </h1>
+  <div class="header-links">
+    <a href="/"><i class="fas fa-home"></i> Portfolio</a>
+    <a href="/django-admin/"><i class="fas fa-cog"></i> Django Admin</a>
+  </div>
+</header>
+<div class="container">
+  <div class="stats">
+    <div class="stat"><div class="n">{{ total }}</div><div class="l">Total Messages</div></div>
+    <div class="stat"><div class="n">{{ unread }}</div><div class="l">Unread</div></div>
+    <div class="stat"><div class="n" style="font-size:.9rem;padding-top:.6rem;">PostgreSQL</div><div class="l">Database</div></div>
+  </div>
+  {% if messages_list %}
+    {% for m in messages_list %}
+    <div class="msg {% if not m.is_read %}unread{% endif %}">
+      <div class="msg-top">
+        <div>
+          <div class="msg-name">{{ m.name }} {% if not m.is_read %}<span style="font-size:.65rem;background:rgba(124,58,237,.2);color:#a78bfa;padding:.1rem .45rem;border-radius:999px;font-weight:600;vertical-align:middle;">NEW</span>{% endif %}</div>
+          <div class="msg-email">{{ m.email }}</div>
+        </div>
+        <div class="msg-date">{{ m.created_at|date:"d M Y, H:i" }}</div>
+      </div>
+      {% if m.subject %}<div class="msg-subject">Subject: <span>{{ m.subject }}</span></div>{% endif %}
+      <div class="msg-body">{{ m.message }}</div>
+      <div class="msg-actions">
+        {% if not m.is_read %}
+        <a href="/messages/{{ m.pk }}/read/" class="btn-read"><i class="fas fa-check"></i> Mark Read</a>
+        {% endif %}
+        <form method="POST" action="/messages/{{ m.pk }}/delete/" style="display:inline;" onsubmit="return confirm('Delete this message?')">
+          {% csrf_token %}
+          <button class="btn-del" type="submit"><i class="fas fa-trash"></i> Delete</button>
+        </form>
+      </div>
+    </div>
+    {% endfor %}
+  {% else %}
+    <div class="empty">
+      <p style="font-size:3rem;">&#128235;</p>
+      <p style="margin-top:1rem;font-size:1.1rem;">No messages yet &mdash; share your portfolio!</p>
+    </div>
+  {% endif %}
+</div>
+</body>
+</html>
