@@ -2,18 +2,15 @@ services:
   - type: web
     name: raj-portfolio
     runtime: python
-    buildCommand: pip install -r requirements.txt && python manage.py collectstatic --noinput && python manage.py migrate
-    startCommand: gunicorn portfolio.wsgi:application
+    buildCommand: "pip install -r requirements.txt && python manage.py collectstatic --noinput && python manage.py migrate"
+    startCommand: "gunicorn portfolio.wsgi:application"
+    plan: free
     envVars:
       - key: SECRET_KEY
         generateValue: true
       - key: DEBUG
-        value: False
+        value: "False"
       - key: ALLOWED_HOSTS
-        value: '*'
+        value: "*"
       - key: CSRF_TRUSTED_ORIGINS
-        value: https://raj-portfolio.onrender.com
-      - key: PYTHON_VERSION
-        value: 3.11.0
-
-# redeploy trigger
+        value: "https://raj-portfolio.onrender.com"
